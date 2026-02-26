@@ -17,3 +17,8 @@ jobs:
 
       - name: Flake check
         run: nix flake check
+
+      - name: Eval modules
+        run: |
+          nix eval .#nixosModules.happy-server.options.services.happy-server.enable
+          nix eval .#nixosModules.happy-stack.options.services.happy-stack.enable
