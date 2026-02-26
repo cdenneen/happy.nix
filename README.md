@@ -56,6 +56,23 @@ sudo podman exec happy-server-happy-server \
 PGlite uses the embedded database at `PGLITE_DIR`. Postgres uses `DATABASE_URL` (set by the module
 for local containers or external services).
 
+Authentication and device setup
+
+Happy Codex requires an authenticated Happy account on first run. Configure the relay URL, then
+follow the on-screen pairing flow in the Happy app or web app.
+
+```sh
+# Set the relay server for CLI sessions
+export HAPPY_SERVER_URL="https://happy.example.com"
+```
+
+On mobile or web:
+
+- Happy app: Settings → Relay Server URL → `https://happy.example.com`
+- Web app: https://app.happy.engineering (Settings → Relay Server URL)
+
+When `happy codex` starts, it will prompt you to authenticate; approve the session in the app/web UI.
+
 Key options:
 
 - `image` (default `ghcr.io/cdenneen/happy-server:latest`)
