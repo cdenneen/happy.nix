@@ -21,4 +21,6 @@ jobs:
       - name: Eval modules
         run: |
           nix eval .#nixosModules.happy-server.options.services.happy-server.enable
+          nix eval .#nixosModules.happy-codex-agent.options.services.happy-codex-agent.enable
+          nix eval .#nixosModules.happy-agent.options.services.happy-agent.enable
           nix eval .#nixosModules.happy-stack.options.services.happy-stack.enable

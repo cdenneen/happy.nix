@@ -5,7 +5,9 @@ Reusable NixOS modules for Happy Server and Happy Codex instances.
 ## Modules
 
 - `nixosModules.happy-server`
-- `nixosModules.happy-stack`
+- `nixosModules.happy-codex-agent`
+- `nixosModules.happy-agent`
+- `nixosModules.happy-stack` (legacy alias of happy-codex-agent)
 
 ## Happy Server (services.happy-server)
 
@@ -81,10 +83,10 @@ Key options:
 - `dataDir`, `pgliteDir`, `filesDir`
 - `handyMasterSecret` (optional; generated once if missing)
 
-## Happy Codex (services.happy-stack)
+## Happy Codex (services.happy-codex-agent)
 
 ```nix
-services.happy-stack = {
+services.happy-codex-agent = {
   enable = true;
   mode = "user"; # or "system"
   instances = [
@@ -98,6 +100,42 @@ services.happy-stack = {
 ```
 
 Each instance starts a `happy codex` service in the specified workspace.
+
+## Happy Agent (services.happy-agent)
+
+```nix
+services.happy-agent = {
+  enable = true;
+  mode = "user"; # or "system"
+  instances = [
+    {
+      name = "workspace";
+      workspace = "/path/to/workspace";
+      happyServerUrl = "https://happy.example.com";
+    }
+  ];
+};
+```
+
+Each instance starts `happy` (no codex flag) in the specified workspace.
+
+## Run with nix run
+
+Quick local smoke tests:
+
+```sh
+# Run the Happy Server container with PGlite (ephemeral data)
+nix run github:cdenneen/happy.nix#happy-server
+
+# Run Happy Codex in the current working directory
+nix run github:cdenneen/happy.nix#happy-codex-agent
+
+# Run Happy Agent (defaults to Claude Code) in the current working directory
+nix run github:cdenneen/happy.nix#happy-agent
+```
+
+Set `HAPPY_SERVER_IMAGE` to override the container image, and
+`HANDY_MASTER_SECRET` to control the server secret when using `happy-server`.
 
 ## CI
 
