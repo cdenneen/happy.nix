@@ -22,6 +22,29 @@
       nixosModules.happy-agent = import ./modules/happy-agent.nix;
       nixosModules.happy-stack = import ./modules/happy-stack.nix;
 
+      formatter = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in
+        pkgs.writeShellApplication {
+          name = "nixfmt-wrapper";
+          runtimeInputs = [
+            pkgs.findutils
+            pkgs.nixfmt
+          ];
+          text = ''
+            set -euo pipefail
+
+            if [ "$#" -gt 0 ]; then
+              exec nixfmt "$@"
+            fi
+
+            find . -name '*.nix' -not -path './.git/*' -print0 | xargs -0 -r nixfmt
+          '';
+        }
+      );
+
       apps = forAllSystems (
         system:
         let
