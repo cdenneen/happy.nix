@@ -7,36 +7,6 @@
 
 let
   cfg = config.services.happy-stack;
-  mkService = name: instance: {
-    description = "Happy codex (${name})";
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    wantedBy = if cfg.mode == "system" then [ "multi-user.target" ] else [ "default.target" ];
-    serviceConfig = {
-      Type = "simple";
-      WorkingDirectory = instance.workspace;
-      ExecStart = "${pkgs.happy-coder}/bin/happy codex";
-      Restart = "on-failure";
-      RestartSec = 5;
-      Environment = [
-        "PATH=${
-          lib.makeBinPath [
-            pkgs.happy-coder
-            pkgs.codex
-            pkgs.coreutils
-          ]
-        }"
-      ]
-      ++ lib.optional (instance.happyServerUrl != null) "HAPPY_SERVER_URL=${instance.happyServerUrl}";
-    };
-  };
-
-  serviceSet = lib.listToAttrs (
-    map (instance: {
-      name = "happy-codex-${instance.name}";
-      value = mkService instance.name instance;
-    }) cfg.instances
-  );
 in
 {
   options.services.happy-stack = {
@@ -60,7 +30,7 @@ in
                 description = "Instance name (used in unit name).";
               };
               workspace = lib.mkOption {
-                type = lib.types.path;
+                type = lib.types.str;
                 description = "Workspace directory for the instance.";
               };
               happyServerUrl = lib.mkOption {
@@ -78,6 +48,38 @@ in
   };
 
   config = lib.mkIf cfg.enable (
+    let
+      mkService = name: instance: {
+        description = "Happy codex (${name})";
+        after = [ "network-online.target" ];
+        wants = [ "network-online.target" ];
+        wantedBy = if cfg.mode == "system" then [ "multi-user.target" ] else [ "default.target" ];
+        serviceConfig = {
+          Type = "simple";
+          WorkingDirectory = instance.workspace;
+          ExecStart = "${pkgs.happy-coder}/bin/happy codex";
+          Restart = "on-failure";
+          RestartSec = 5;
+          Environment = [
+            "PATH=${
+              lib.makeBinPath [
+                pkgs.happy-coder
+                pkgs.codex
+                pkgs.coreutils
+              ]
+            }"
+          ]
+          ++ lib.optional (instance.happyServerUrl != null) "HAPPY_SERVER_URL=${instance.happyServerUrl}";
+        };
+      };
+
+      serviceSet = lib.listToAttrs (
+        map (instance: {
+          name = "happy-codex-${instance.name}";
+          value = mkService instance.name instance;
+        }) cfg.instances
+      );
+    in
     if cfg.mode == "system" then
       { systemd.services = serviceSet; }
     else
