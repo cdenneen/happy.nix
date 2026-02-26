@@ -1,11 +1,12 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 
 {
-  options.services.happy-codex-agent = {
+  options.services."happy-codex-agent" = {
     enable = lib.mkEnableOption "Happy codex agent instances";
     mode = lib.mkOption {
       type = lib.types.enum [
@@ -55,37 +56,37 @@
 
   config =
     let
-      cfg = config.services.happy-codex-agent;
-    in
-    lib.mkIf cfg.enable (
-      let
-        mkService = name: instance: {
-          description = "Happy codex (${name})";
-          after = [ "network-online.target" ];
-          wants = [ "network-online.target" ];
-          wantedBy = if cfg.mode == "system" then [ "multi-user.target" ] else [ "default.target" ];
-          serviceConfig = {
-            Type = "simple";
-            WorkingDirectory = instance.workspace;
-            ExecStart = "${cfg.happyBin} codex";
-            Restart = "on-failure";
-            RestartSec = 5;
-            Environment =
-              lib.optional (cfg.pathPackages != [ ]) "PATH=${lib.makeBinPath cfg.pathPackages}"
-              ++ lib.optional (instance.happyServerUrl != null) "HAPPY_SERVER_URL=${instance.happyServerUrl}";
-          };
+      cfg = config.services."happy-codex-agent";
+      mkService = name: instance: {
+        description = "Happy codex (${name})";
+        after = [ "network-online.target" ];
+        wants = [ "network-online.target" ];
+        wantedBy = if cfg.mode == "system" then [ "multi-user.target" ] else [ "default.target" ];
+        serviceConfig = {
+          Type = "simple";
+          WorkingDirectory = instance.workspace;
+          ExecStart = "${cfg.happyBin} codex";
+          Restart = "on-failure";
+          RestartSec = 5;
+          Environment =
+            lib.optional (cfg.pathPackages != [ ]) "PATH=${lib.makeBinPath cfg.pathPackages}"
+            ++ lib.optional (instance.happyServerUrl != null) "HAPPY_SERVER_URL=${instance.happyServerUrl}";
         };
+      };
 
-        serviceSet = lib.listToAttrs (
-          map (instance: {
-            name = "happy-codex-${instance.name}";
-            value = mkService instance.name instance;
-          }) cfg.instances
-        );
-      in
-      if cfg.mode == "system" then
-        { systemd.services = serviceSet; }
-      else
-        { systemd.user.services = serviceSet; }
-    );
+      serviceSet = lib.listToAttrs (
+        map (instance: {
+          name = "happy-codex-${instance.name}";
+          value = mkService instance.name instance;
+        }) cfg.instances
+      );
+    in
+    lib.mkMerge [
+      (lib.mkIf ((cfg.enable or false) && cfg.mode == "system") {
+        systemd.services = serviceSet;
+      })
+      (lib.mkIf ((cfg.enable or false) && cfg.mode == "user") {
+        systemd.user.services = serviceSet;
+      })
+    ];
 }
