@@ -64,8 +64,12 @@
             trap 'rm -rf "$data_dir"' EXIT
 
             runtime="${pkgs.podman}/bin/podman"
-            if "${pkgs.docker}/bin/docker" info > /dev/null 2>&1; then
+            if /usr/bin/docker info > /dev/null 2>&1; then
+              runtime=/usr/bin/docker
+            elif "${pkgs.docker}/bin/docker" info > /dev/null 2>&1; then
               runtime="${pkgs.docker}/bin/docker"
+            elif "${pkgs.podman}/bin/podman" info > /dev/null 2>&1; then
+              runtime="${pkgs.podman}/bin/podman"
             fi
 
             "$runtime" run --rm \
