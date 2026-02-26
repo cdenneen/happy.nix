@@ -75,6 +75,7 @@
             if [ "''${HAPPY_SERVER_SKIP_MIGRATE:-0}" != "1" ]; then
               "$runtime" run --rm \
                 -e HANDY_MASTER_SECRET="$secret" \
+                -e PORT=3000 \
                 -e DATA_DIR=/data \
                 -e PGLITE_DIR=/data/pglite \
                 -v "$data_dir:/data" \
@@ -85,6 +86,7 @@
             "$runtime" run --rm \
               -p 3000:3000 \
               -e HANDY_MASTER_SECRET="$secret" \
+              -e PORT=3000 \
               -e DATA_DIR=/data \
               -e PGLITE_DIR=/data/pglite \
               -v "$data_dir:/data" \
