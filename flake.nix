@@ -72,6 +72,16 @@
               runtime="${pkgs.podman}/bin/podman"
             fi
 
+            if [ "''${HAPPY_SERVER_SKIP_MIGRATE:-0}" != "1" ]; then
+              "$runtime" run --rm \
+                -e HANDY_MASTER_SECRET="$secret" \
+                -e DATA_DIR=/data \
+                -e PGLITE_DIR=/data/pglite \
+                -v "$data_dir:/data" \
+                "$image" \
+                yarn --cwd packages/happy-server standalone migrate
+            fi
+
             "$runtime" run --rm \
               -p 3000:3000 \
               -e HANDY_MASTER_SECRET="$secret" \
