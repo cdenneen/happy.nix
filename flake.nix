@@ -62,7 +62,13 @@
             secret="''${HANDY_MASTER_SECRET:-dev-secret}"
             data_dir="$(mktemp -d)"
             trap 'rm -rf "$data_dir"' EXIT
-            ${pkgs.podman}/bin/podman run --rm \
+
+            runtime="${pkgs.podman}/bin/podman"
+            if "${pkgs.docker}/bin/docker" info > /dev/null 2>&1; then
+              runtime="${pkgs.docker}/bin/docker"
+            fi
+
+            "$runtime" run --rm \
               -p 3000:3000 \
               -e HANDY_MASTER_SECRET="$secret" \
               -e DATA_DIR=/data \
