@@ -24,21 +24,27 @@ jobs:
             let
               flake = builtins.getFlake (toString ./.);
               lib = flake.inputs.nixpkgs.lib;
-              eval = lib.evalModules { modules = [ flake.nixosModules.happy-server ]; };
+              system = "x86_64-linux";
+              pkgs = flake.inputs.nixpkgs.legacyPackages.${system};
+              eval = lib.nixosSystem { inherit system pkgs; modules = [ flake.nixosModules.happy-server ]; };
             in eval.options.services.happy-server.enable
           '
           nix eval --impure --expr '
             let
               flake = builtins.getFlake (toString ./.);
               lib = flake.inputs.nixpkgs.lib;
-              eval = lib.evalModules { modules = [ flake.nixosModules.happy-codex-agent ]; };
+              system = "x86_64-linux";
+              pkgs = flake.inputs.nixpkgs.legacyPackages.${system};
+              eval = lib.nixosSystem { inherit system pkgs; modules = [ flake.nixosModules.happy-codex-agent ]; };
             in eval.options.services."happy-codex-agent".enable
           '
           nix eval --impure --expr '
             let
               flake = builtins.getFlake (toString ./.);
               lib = flake.inputs.nixpkgs.lib;
-              eval = lib.evalModules { modules = [ flake.nixosModules.happy-agent ]; };
+              system = "x86_64-linux";
+              pkgs = flake.inputs.nixpkgs.legacyPackages.${system};
+              eval = lib.nixosSystem { inherit system pkgs; modules = [ flake.nixosModules.happy-agent ]; };
             in eval.options.services."happy-agent".enable
           '
 
