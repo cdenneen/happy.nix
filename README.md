@@ -7,8 +7,6 @@ Reusable NixOS modules for Happy Server and Happy Codex instances.
 - `nixosModules.happy-server`
 - `nixosModules.happy-codex-agent`
 - `nixosModules.happy-agent`
-- `nixosModules.happy-codex-agent`
-- `nixosModules.happy-agent`
 
 ## Happy Server (services.happy-server)
 
