@@ -1,0 +1,86 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+
+let
+  cfg = config.services.happy-stack;
+  mkService = name: instance: {
+    description = "Happy codex (${name})";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    wantedBy = if cfg.mode == "system" then [ "multi-user.target" ] else [ "default.target" ];
+    serviceConfig = {
+      Type = "simple";
+      WorkingDirectory = instance.workspace;
+      ExecStart = "${pkgs.happy-coder}/bin/happy codex";
+      Restart = "on-failure";
+      RestartSec = 5;
+      Environment = [
+        "PATH=${
+          lib.makeBinPath [
+            pkgs.happy-coder
+            pkgs.codex
+            pkgs.coreutils
+          ]
+        }"
+      ]
+      ++ lib.optional (instance.happyServerUrl != null) "HAPPY_SERVER_URL=${instance.happyServerUrl}";
+    };
+  };
+
+  serviceSet = lib.listToAttrs (
+    map (instance: {
+      name = "happy-codex-${instance.name}";
+      value = mkService instance.name instance;
+    }) cfg.instances
+  );
+in
+{
+  options.services.happy-stack = {
+    enable = lib.mkEnableOption "Happy codex instances";
+    mode = lib.mkOption {
+      type = lib.types.enum [
+        "user"
+        "system"
+      ];
+      default = "user";
+      description = "Systemd service mode for codex instances.";
+    };
+    instances = lib.mkOption {
+      type = lib.types.listOf (
+        lib.types.submodule (
+          { ... }:
+          {
+            options = {
+              name = lib.mkOption {
+                type = lib.types.str;
+                description = "Instance name (used in unit name).";
+              };
+              workspace = lib.mkOption {
+                type = lib.types.path;
+                description = "Workspace directory for the instance.";
+              };
+              happyServerUrl = lib.mkOption {
+                type = lib.types.nullOr lib.types.str;
+                default = null;
+                description = "Optional HAPPY_SERVER_URL override.";
+              };
+            };
+          }
+        )
+      );
+      default = [ ];
+      description = "Happy codex instances to run.";
+    };
+  };
+
+  config = lib.mkIf cfg.enable (
+    if cfg.mode == "system" then
+      { systemd.services = serviceSet; }
+    else
+      { systemd.user.services = serviceSet; }
+  );
+}
