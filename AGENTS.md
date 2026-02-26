@@ -33,3 +33,7 @@ Storage modes:
 
 - CI runs `nix flake check` on PRs and pushes.
 - Weekly flake.lock update PRs via GitHub Actions.
+
+## Pre-commit
+
+- Run `nix fmt` before committing changes.

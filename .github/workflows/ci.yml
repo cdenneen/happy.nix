@@ -20,28 +20,28 @@ jobs:
 
       - name: Eval modules
         run: |
-          nix eval --expr '
+          nix eval --impure --expr '
             let
               flake = builtins.getFlake (toString ./.);
               lib = flake.inputs.nixpkgs.lib;
               eval = lib.evalModules { modules = [ flake.nixosModules.happy-server ]; };
             in eval.options.services.happy-server.enable
           '
-          nix eval --expr '
+          nix eval --impure --expr '
             let
               flake = builtins.getFlake (toString ./.);
               lib = flake.inputs.nixpkgs.lib;
               eval = lib.evalModules { modules = [ flake.nixosModules.happy-codex-agent ]; };
             in eval.options.services."happy-codex-agent".enable
           '
-          nix eval --expr '
+          nix eval --impure --expr '
             let
               flake = builtins.getFlake (toString ./.);
               lib = flake.inputs.nixpkgs.lib;
               eval = lib.evalModules { modules = [ flake.nixosModules.happy-agent ]; };
             in eval.options.services."happy-agent".enable
           '
-          nix eval --expr '
+          nix eval --impure --expr '
             let
               flake = builtins.getFlake (toString ./.);
               lib = flake.inputs.nixpkgs.lib;
