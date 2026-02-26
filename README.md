@@ -38,6 +38,24 @@ services.happy-server.storage.external.redisUrl = "redis://...";
 services.happy-server.storage.external.s3.endpoint = "s3.example.com";
 ```
 
+Schema initialization (required)
+
+Happy Server needs the database schema loaded before it can serve traffic. Run one of these once
+after the container starts:
+
+```sh
+# PGlite mode (default)
+sudo podman exec happy-server-happy-server \
+  yarn --cwd packages/happy-server standalone migrate
+
+# Postgres mode (local or external)
+sudo podman exec happy-server-happy-server \
+  yarn --cwd packages/happy-server prisma migrate deploy
+```
+
+PGlite uses the embedded database at `PGLITE_DIR`. Postgres uses `DATABASE_URL` (set by the module
+for local containers or external services).
+
 Key options:
 
 - `image` (default `ghcr.io/cdenneen/happy-server:latest`)
