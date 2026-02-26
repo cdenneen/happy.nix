@@ -19,6 +19,16 @@ in
       default = "user";
       description = "Systemd service mode for codex instances.";
     };
+    happyBin = lib.mkOption {
+      type = lib.types.str;
+      default = "happy";
+      description = "Happy CLI command used to launch codex.";
+    };
+    pathPackages = lib.mkOption {
+      type = lib.types.listOf lib.types.package;
+      default = [ ];
+      description = "Extra packages to add to PATH for the codex service.";
+    };
     instances = lib.mkOption {
       type = lib.types.listOf (
         lib.types.submodule (
@@ -57,19 +67,12 @@ in
         serviceConfig = {
           Type = "simple";
           WorkingDirectory = instance.workspace;
-          ExecStart = "${pkgs.happy-coder}/bin/happy codex";
+          ExecStart = "${cfg.happyBin} codex";
           Restart = "on-failure";
           RestartSec = 5;
-          Environment = [
-            "PATH=${
-              lib.makeBinPath [
-                pkgs.happy-coder
-                pkgs.codex
-                pkgs.coreutils
-              ]
-            }"
-          ]
-          ++ lib.optional (instance.happyServerUrl != null) "HAPPY_SERVER_URL=${instance.happyServerUrl}";
+          Environment =
+            lib.optional (cfg.pathPackages != [ ]) "PATH=${lib.makeBinPath cfg.pathPackages}"
+            ++ lib.optional (instance.happyServerUrl != null) "HAPPY_SERVER_URL=${instance.happyServerUrl}";
         };
       };
 
