@@ -5,7 +5,8 @@ This repo provides reusable NixOS modules for Happy Server and Happy Codex insta
 ## Modules
 
 - `nixosModules.happy-server`
-- `nixosModules.happy-stack`
+- `nixosModules.happy-codex-agent`
+- `nixosModules.happy-agent`
 
 ## Happy Server Options
 
@@ -24,9 +25,9 @@ Storage modes:
 
 ## Happy Codex Instances
 
-`services.happy-stack.instances = [ { name, workspace, happyServerUrl? } ... ]`
+`services.happy-codex-agent.instances = [ { name, workspace, happyServerUrl? } ... ]`
 
-- Default mode: user services (`services.happy-stack.mode = "user"`)
+- Default mode: user services (`services.happy-codex-agent.mode = "user"`)
 - Set `mode = "system"` to use system services instead.
 
 ## CI

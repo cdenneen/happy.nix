@@ -41,13 +41,6 @@ jobs:
               eval = lib.evalModules { modules = [ flake.nixosModules.happy-agent ]; };
             in eval.options.services."happy-agent".enable
           '
-          nix eval --impure --expr '
-            let
-              flake = builtins.getFlake (toString ./.);
-              lib = flake.inputs.nixpkgs.lib;
-              eval = lib.evalModules { modules = [ flake.nixosModules.happy-stack ]; };
-            in eval.options.services."happy-codex-agent".enable
-          '
 
       - name: Install Podman
         run: sudo apt-get update && sudo apt-get install -y podman

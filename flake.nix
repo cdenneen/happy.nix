@@ -20,7 +20,6 @@
       nixosModules.happy-server = import ./modules/happy-server.nix;
       nixosModules.happy-codex-agent = import ./modules/happy-codex-agent.nix;
       nixosModules.happy-agent = import ./modules/happy-agent.nix;
-      nixosModules.happy-stack = import ./modules/happy-stack.nix;
 
       formatter = forAllSystems (
         system:

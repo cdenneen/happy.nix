@@ -7,7 +7,8 @@ Reusable NixOS modules for Happy Server and Happy Codex instances.
 - `nixosModules.happy-server`
 - `nixosModules.happy-codex-agent`
 - `nixosModules.happy-agent`
-- `nixosModules.happy-stack`
+- `nixosModules.happy-codex-agent`
+- `nixosModules.happy-agent`
 
 ## Happy Server (services.happy-server)
 
@@ -83,10 +84,10 @@ Key options:
 - `dataDir`, `pgliteDir`, `filesDir`
 - `handyMasterSecret` (optional; generated once if missing)
 
-## Happy Codex (services.happy-stack)
+## Happy Codex (services.happy-codex-agent)
 
 ```nix
-services.happy-stack = {
+services.happy-codex-agent = {
   enable = true;
   mode = "user"; # or "system"
   instances = [
