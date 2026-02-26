@@ -20,7 +20,54 @@ jobs:
 
       - name: Eval modules
         run: |
-          nix eval .#nixosModules.happy-server.options.services.happy-server.enable
-          nix eval .#nixosModules.happy-codex-agent.options.services.happy-codex-agent.enable
-          nix eval .#nixosModules.happy-agent.options.services.happy-agent.enable
-          nix eval .#nixosModules.happy-stack.options.services.happy-stack.enable
+          nix eval --expr '
+            let
+              flake = builtins.getFlake (toString ./.);
+              lib = flake.inputs.nixpkgs.lib;
+              eval = lib.evalModules { modules = [ flake.nixosModules.happy-server ]; };
+            in eval.options.services.happy-server.enable
+          '
+          nix eval --expr '
+            let
+              flake = builtins.getFlake (toString ./.);
+              lib = flake.inputs.nixpkgs.lib;
+              eval = lib.evalModules { modules = [ flake.nixosModules.happy-codex-agent ]; };
+            in eval.options.services."happy-codex-agent".enable
+          '
+          nix eval --expr '
+            let
+              flake = builtins.getFlake (toString ./.);
+              lib = flake.inputs.nixpkgs.lib;
+              eval = lib.evalModules { modules = [ flake.nixosModules.happy-agent ]; };
+            in eval.options.services."happy-agent".enable
+          '
+          nix eval --expr '
+            let
+              flake = builtins.getFlake (toString ./.);
+              lib = flake.inputs.nixpkgs.lib;
+              eval = lib.evalModules { modules = [ flake.nixosModules.happy-stack ]; };
+            in eval.options.services."happy-codex-agent".enable
+          '
+
+      - name: Install Podman
+        run: sudo apt-get update && sudo apt-get install -y podman
+
+      - name: Smoke test happy-server app
+        run: |
+          set -euo pipefail
+          HAPPY_SERVER_IMAGE=ghcr.io/cdenneen/happy-server:latest \
+            HANDY_MASTER_SECRET=ci-secret \
+            nix run .#happy-server &
+          app_pid=$!
+          for i in $(seq 1 30); do
+            if curl -fsS --max-time 5 http://localhost:3000/health > /dev/null; then
+              break
+            fi
+            if [ "$i" -eq 30 ]; then
+              kill "$app_pid" || true
+              exit 1
+            fi
+            sleep 2
+          done
+          curl -fsS http://localhost:3000/health
+          kill "$app_pid" || true
