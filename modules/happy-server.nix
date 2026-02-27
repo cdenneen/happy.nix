@@ -37,10 +37,17 @@ let
     "PUBLIC_URL" = cfg.publicUrl;
   };
 
-  envLocalFiles = {
-    "DATA_DIR" = cfg.dataDir;
-    "PGLITE_DIR" = cfg.pgliteDir;
-    "FILES_DIR" = cfg.filesDir;
+  containerDataDir = "/data";
+  containerFilesDir = "${containerDataDir}/files";
+  containerPgliteDir = "${containerDataDir}/pglite";
+
+  envFiles = {
+    "DATA_DIR" = containerDataDir;
+    "FILES_DIR" = containerFilesDir;
+  };
+
+  envPglite = {
+    "PGLITE_DIR" = containerPgliteDir;
   };
 
   envDb =
@@ -84,7 +91,8 @@ let
 
   pgliteEnabled = !localPostgres && !externalDb;
 
-  serverEnv = envBase // (if pgliteEnabled then envLocalFiles else { }) // envDb // envRedis // envS3;
+  serverEnv =
+    envBase // envFiles // (if pgliteEnabled then envPglite else { }) // envDb // envRedis // envS3;
 
   envFileScript = pkgs.writeShellScript "happy-env" ''
     set -euo pipefail
